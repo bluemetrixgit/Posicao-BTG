@@ -12,17 +12,19 @@ def limpar_conta(valor):
     valor = str(valor).strip().replace('.0', '')
     valor = ''.join(filter(str.isdigit, valor))
     return valor.zfill(9) if valor else ''
-
+    
 @st.cache_data
 def carregar_e_processar(controle_bytes, posicao_bytes):
     """Carrega e processa as planilhas (só roda 1 vez)"""
     
+    from io import BytesIO
+
     # ---- Controle ----
-    df_controle = pd.read_excel(controle_bytes, sheet_name="BTG", skiprows=1)
+    df_controle = pd.read_excel(BytesIO(controle_bytes), sheet_name="BTG", skiprows=1)
     df_controle['Conta'] = df_controle['Conta'].apply(limpar_conta)
 
     # ---- Posição ----
-    df_posicao = pd.read_excel(posicao_bytes)
+    df_posicao = pd.read_excel(BytesIO(posicao_bytes))
     df_posicao['Conta'] = df_posicao['Conta'].apply(limpar_conta)
     df_posicao["Valor Bruto"] = pd.to_numeric(df_posicao["Valor Bruto"], errors="coerce").fillna(0)
 
@@ -59,6 +61,14 @@ def carregar_e_processar(controle_bytes, posicao_bytes):
 
     for col in ["PL", "Caixa", "D+0", "D+2"]:
         df_base[col] = df_base[col].fillna(0)
+
+    # Listas para os multiselects
+    ativos = sorted(df_posicao["Ativo"].dropna().astype(str).unique().tolist())
+    produtos = sorted(df_posicao["Produto"].dropna().astype(str).unique().tolist())
+    submercados = sorted(df_posicao["Sub Mercado"].dropna().astype(str).unique().tolist())
+    emissores = sorted(df_posicao["Emissor"].dropna().astype(str).unique().tolist())
+
+    return df_base, df_posicao, ativos, produtos, submercados, emissores, len(contas_comuns)
 
     # Listas para os multiselects
     ativos = sorted(df_posicao["Ativo"].dropna().astype(str).unique().tolist())
