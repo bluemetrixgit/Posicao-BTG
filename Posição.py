@@ -41,9 +41,15 @@ def carregar_e_processar(controle_bytes, posicao_bytes):
     # ---- Colunas fixas de valor (PL, Caixa, D+0, D+2) ----
     pl_total = df_posicao.groupby("Conta")["Valor Bruto"].sum().reset_index().rename(columns={"Valor Bruto": "PL"})
 
-    d0 = (df_posicao[df_posicao["Produto"] == "BTG Tesouro Selic FIRFRefDI"]
+    d0 = (df_posicao[
+            df_posicao["Produto"].isin([
+                "BTG Tesouro Selic FIRFRefDI",
+                "BTG CDB Plus FIRF CrPr"
+            ])
+          ]
           .groupby("Conta")["Valor Bruto"].sum()
-          .reset_index().rename(columns={"Valor Bruto": "D+0"}))
+          .reset_index()
+          .rename(columns={"Valor Bruto": "D+0"}))
 
     d2 = (df_posicao[df_posicao["Produto"] == "BLUEMETRIX RF ATIVO FIRF"]
           .groupby("Conta")["Valor Bruto"].sum()
