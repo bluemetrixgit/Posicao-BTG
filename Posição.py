@@ -467,7 +467,6 @@ else:
     st.info(
         "Faça o upload das duas planilhas para começar."
     )
-```
 
 
 else:
